@@ -1,6 +1,6 @@
 # hl : pipeline highlighter
 
-simple pipeline highligh tool
+simple pipeline highlight tool
 
 
 ## build
