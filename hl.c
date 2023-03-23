@@ -5,7 +5,8 @@
 #define HL_LINE "1"
 #define HL_TEXT "31"
 
-void process_option(char option, int *cflags) {
+int process_option(char option, int *cflags) {
+  int result = -1;
   switch (option) {
     case 'i' : // ignore string case
       *cflags |= REG_ICASE;
@@ -13,15 +14,31 @@ void process_option(char option, int *cflags) {
     case 'E' : // support extended
       *cflags |= REG_EXTENDED;
       break;
+    case 'h' : // print help
+      printf(
+          "i : ignore upper/lower case\n"
+          "E : support extended regex\n"
+          "h : help\n"
+          "");
+      result = 0; // normal option but need to quit
+      break;
     default :
+      fprintf(stderr, "unknown option %c \n", option);
+      result = 1;
       break;
   }
+  return result;
 }
 
-void parse_options(char *options, int *cflags) {
-  for(int i = 1; i < strlen(options); i ++) {
-    process_option(options[i], cflags);
+int parse_options(char *options, int *cflags) {
+  int result = -1;
+  for (int i = 1; i < strlen(options); i ++) {
+    result = process_option(options[i], cflags);
+    if (result != -1) {
+      break;
+    }
   }
+  return result;
 }
 
 int main(int argc, char *argv[]) {
@@ -37,12 +54,21 @@ int main(int argc, char *argv[]) {
 
   for (int i = 1; i < argc; i++) {
     if(argv[i][0] == '-') {
-      parse_options(argv[i], &cflags);
+      int result = parse_options(argv[i], &cflags);
+      if (result != -1) {
+
+        return result;
+      }
     }
     else {
       pattern = argv[i];
       break; // ignore after arguments
     }
+  }
+
+  if (pattern == NULL) {
+    fprintf(stderr, "pattern not found\n");
+    return 1;
   }
 
   if (regcomp(&regex, pattern, cflags) != 0) {
