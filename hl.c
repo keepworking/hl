@@ -12,6 +12,7 @@ void process_option(char option, int *cflags) {
       break;
     case 'E' : // support extended
       *cflags |= REG_EXTENDED;
+      break;
     default :
       break;
   }
