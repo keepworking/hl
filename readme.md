@@ -12,7 +12,7 @@ gcc hl.c -o hl
 ## install
 
 ```
-chmod +ax hl
+chmod +x hl
 sudo cp hl /usr/bin
 ```
 
