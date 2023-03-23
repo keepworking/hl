@@ -1,0 +1,4 @@
+language: c
+script:
+  - gcc -o hl hl.c
+  - echo "Hello_world" | ./hl -i "hello.world"
