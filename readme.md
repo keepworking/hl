@@ -28,5 +28,4 @@ sudo cp hl /usr/bin
 ```
 adb logcat | hl -iE "fail|error"
 ```
-
-![image](https://user-images.githubusercontent.com/14015519/227109188-6f13fb39-54e5-4a5a-9400-202b735a5051.png)
+![image](https://user-images.githubusercontent.com/14015519/227450360-095b996d-4f0a-4fa8-a317-89aa3ee9204e.png)
