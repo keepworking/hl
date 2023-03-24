@@ -22,6 +22,21 @@ sudo cp hl /usr/bin
 
 `-E` : support extended regex
 
+`-c` : change color
+
+for example -c `green`, -cc `yellow`, -ccc `blue`, -cccc `magenta`, -ccccc `cyan`, -cccccc `strat on red again`
+
+`-[0~5]` : set color
+```
+0 : red
+1 : green
+2 : yellow
+3 : magenta
+4 : cyan
+````
+
+`b` : set bright color
+
 ## example
 
 
