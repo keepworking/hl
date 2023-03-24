@@ -2,17 +2,46 @@
 #include <string.h>
 #include <regex.h>
 
-#define HL_LINE "1"
-#define HL_TEXT "31"
+#define ESC_COLOR_INDEX_MAX 6
 
-int process_option(char option, int *cflags) {
+typedef struct hl_option {
+  int cflags;
+  int color_index;
+  int is_bright;
+} hl_option_t;
+
+int esc_colors[ESC_COLOR_INDEX_MAX] = {
+  31, // red
+  32, // green
+  33, // yello
+  34, // blue
+  35, // magenta
+  36, // cyan
+};
+
+int process_option(char option, hl_option_t *hl_opt) {
   int result = -1;
   switch (option) {
     case 'i' : // ignore string case
-      *cflags |= REG_ICASE;
+      hl_opt->cflags |= REG_ICASE;
       break;
     case 'E' : // support extended
-      *cflags |= REG_EXTENDED;
+      hl_opt->cflags |= REG_EXTENDED;
+      break;
+    case 'c' : // change color index
+      hl_opt->color_index += 1;
+      hl_opt->color_index = hl_opt->color_index % ESC_COLOR_INDEX_MAX;
+      break;
+    case 'b' : // set bright text color
+      hl_opt->is_bright = 1;
+      break;
+    case '0':
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+      hl_opt->color_index = option - '0';
       break;
     case 'h' : // print help
       printf(
@@ -30,10 +59,15 @@ int process_option(char option, int *cflags) {
   return result;
 }
 
-int parse_options(char *options, int *cflags) {
+void print_esc(int code)
+{
+  printf("\033[%dm", code);
+}
+
+int parse_options(char *options, hl_option_t *hl_opt) {
   int result = -1;
   for (int i = 1; i < strlen(options); i ++) {
-    result = process_option(options[i], cflags);
+    result = process_option(options[i], hl_opt);
     if (result != -1) {
       break;
     }
@@ -46,6 +80,7 @@ int main(int argc, char *argv[]) {
   char *pattern = NULL;
   regex_t regex;
   int cflags = 0;
+  hl_option_t hl_opt = {0,};
 
   if (argc < 2) {
     fprintf(stderr, "argument not founded\n");
@@ -54,7 +89,7 @@ int main(int argc, char *argv[]) {
 
   for (int i = 1; i < argc; i++) {
     if(argv[i][0] == '-') {
-      int result = parse_options(argv[i], &cflags);
+      int result = parse_options(argv[i], &hl_opt);
       if (result != -1) {
 
         return result;
@@ -71,7 +106,7 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  if (regcomp(&regex, pattern, cflags) != 0) {
+  if (regcomp(&regex, pattern, hl_opt.cflags) != 0) {
     fprintf(stderr, "regex compilation error\n");
     return 1;
   }
@@ -84,25 +119,29 @@ int main(int argc, char *argv[]) {
       int match_start = match.rm_so + start;
       int match_end = match.rm_eo + start;
 
-      printf("\033[" HL_LINE "m");
+      print_esc(1); // bold
 
       for (int i = start; i < match_start; i++) {
         putchar(buffer[i]);
       }
 
-      printf("\033[1;" HL_TEXT "m");
+      print_esc(
+        esc_colors[hl_opt.color_index] +
+        (hl_opt.is_bright == 1?60:0)
+      );
+
       for (int i = match_start; i < match_end; i++) {
         putchar(buffer[i]);
       }
-      printf("\033[0m");
-      printf("\033[" HL_LINE "m");
+      print_esc(0); // reset
+      print_esc(1); // bold
 
       start = match_end;
     }
 
     for (int i = start; i < strlen(buffer); i++) {
       if (i == strlen(buffer) -1) {
-        printf("\033[0m");
+        print_esc(0); // reset
       }
       putchar(buffer[i]);
     }
