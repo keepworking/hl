@@ -47,6 +47,8 @@ int process_option(char option, hl_option_t *hl_opt) {
       printf(
           "i : ignore upper/lower case\n"
           "E : support extended regex\n"
+          "c : change to next color index\n"
+          "0~5 : change color index\n"
           "h : help\n"
           "");
       result = 0; // normal option but need to quit
