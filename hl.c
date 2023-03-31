@@ -148,7 +148,7 @@ int main(int argc, char *argv[]) {
       putchar(buffer[i]);
     }
 
-    fflush(stdin);
+    fflush(stdout);
 
   }
 
