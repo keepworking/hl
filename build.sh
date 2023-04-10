@@ -1,7 +1,7 @@
 
 gcc -o hl hl.c
 sudo cp hl /usr/bin
-
+sync
 
 echo 'echo "red green yellow blue magenta cyan" | hl -0 "red" | hl -1 "green" | hl -2 "yellow" | hl -3 "blue" | hl -4 "magenta" | hl -5 "cyan"'
 echo "red green yellow blue magenta cyan" | hl -0 "red" | hl -1 "green" | hl -2 "yellow" | hl -3 "blue" | hl -4 "magenta" | hl -5 "cyan"
