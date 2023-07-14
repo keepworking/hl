@@ -9,6 +9,7 @@ typedef struct hl_option {
   int cflags;
   int color_index;
   int is_bright;
+  char *pattern;
 } hl_option_t;
 
 int esc_colors[ESC_COLOR_INDEX_MAX] = {
@@ -23,6 +24,24 @@ int esc_colors[ESC_COLOR_INDEX_MAX] = {
 int process_option(char option, hl_option_t *hl_opt) {
   int result = -1;
   switch (option) {
+  case 'w': // capture warning
+    hl_opt->cflags |= REG_ICASE;
+    hl_opt->cflags |= REG_EXTENDED;
+    hl_opt->pattern = "warn|warning";
+    hl_opt->color_index = 2;
+    break;
+  case 'e': // capture error
+    hl_opt->cflags |= REG_ICASE;
+    hl_opt->cflags |= REG_EXTENDED;
+    hl_opt->pattern = "err|error|fail|abort";
+    hl_opt->color_index = 0;
+    break;
+  case 'o': // capture error
+    hl_opt->cflags |= REG_ICASE;
+    hl_opt->cflags |= REG_EXTENDED;
+    hl_opt->pattern = "ok|good|nice|fine|success";
+    hl_opt->color_index = 1;
+    break;
   case 'i': // ignore string case
     hl_opt->cflags |= REG_ICASE;
     break;
@@ -78,12 +97,12 @@ int main(int argc, char *argv[]) {
   char *buffer = NULL;
   size_t bufferLen = 0;
   ssize_t read;
-  char *pattern = NULL;
   regex_t regex;
   int cflags = 0;
   hl_option_t hl_opt = {
       0,
   };
+  hl_opt.pattern = NULL;
 
   if (argc < 2) {
     fprintf(stderr, "argument not founded\n");
@@ -97,18 +116,18 @@ int main(int argc, char *argv[]) {
 
         return result;
       }
-    } else {
-      pattern = argv[i];
+    } else if (hl_opt.pattern == NULL) {
+      hl_opt.pattern = argv[i];
       break; // ignore after arguments
     }
   }
 
-  if (pattern == NULL) {
+  if (hl_opt.pattern == NULL) {
     fprintf(stderr, "pattern not found\n");
     return 1;
   }
 
-  if (regcomp(&regex, pattern, hl_opt.cflags) != 0) {
+  if (regcomp(&regex, hl_opt.pattern, hl_opt.cflags) != 0) {
     fprintf(stderr, "regex compilation error\n");
     return 1;
   }
