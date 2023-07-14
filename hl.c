@@ -1,5 +1,6 @@
 #include <regex.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define ESC_COLOR_INDEX_MAX 6
@@ -74,7 +75,9 @@ int parse_options(char *options, hl_option_t *hl_opt) {
 }
 
 int main(int argc, char *argv[]) {
-  char buffer[1024];
+  char *buffer = NULL;
+  size_t bufferLen = 0;
+  ssize_t read;
   char *pattern = NULL;
   regex_t regex;
   int cflags = 0;
@@ -110,7 +113,7 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  while (fgets(buffer, sizeof(buffer), stdin)) {
+  while ((read = getline(&buffer, &bufferLen, stdin)) != -1) {
     int start = 0;
     regmatch_t match;
 
@@ -136,8 +139,8 @@ int main(int argc, char *argv[]) {
       start = match_end;
     }
 
-    for (int i = start; i < strlen(buffer); i++) {
-      if (i == strlen(buffer) - 1) {
+    for (int i = start; i < read; i++) {
+      if (i == read - 1) {
         print_esc(0); // reset
       }
       putchar(buffer[i]);
@@ -147,6 +150,7 @@ int main(int argc, char *argv[]) {
   }
 
   regfree(&regex);
+  free(buffer);
 
   return 0;
 }
