@@ -10,6 +10,7 @@ typedef struct hl_option {
   int color_index;
   int is_bright;
   char *pattern;
+  int max_width;
 } hl_option_t;
 
 int esc_colors[ESC_COLOR_INDEX_MAX] = {
@@ -24,6 +25,9 @@ int esc_colors[ESC_COLOR_INDEX_MAX] = {
 int process_option(char option, hl_option_t *hl_opt) {
   int result = -1;
   switch (option) {
+  case 's': // make short width, ignore long line
+    hl_opt->max_width = 72;
+    break;
   case 'w': // capture warning
     hl_opt->cflags |= REG_ICASE;
     hl_opt->cflags |= REG_EXTENDED;
@@ -102,6 +106,7 @@ int main(int argc, char *argv[]) {
   hl_option_t hl_opt = {
       0,
   };
+  hl_opt.max_width = -1;
   hl_opt.pattern = NULL;
 
   if (argc < 2) {
@@ -161,6 +166,10 @@ int main(int argc, char *argv[]) {
     for (int i = start; i < read; i++) {
       if (i == read - 1) {
         print_esc(0); // reset
+      } else if (hl_opt.max_width != -1 && i > hl_opt.max_width) {
+        print_esc(0);
+        printf("(....)\n");
+        i = read;
       }
       putchar(buffer[i]);
     }
